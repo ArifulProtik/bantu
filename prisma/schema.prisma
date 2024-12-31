@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  GITHUB
+}
+
+model User {
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  username        String            @unique @default(nanoid(6))
+  email           String            @unique
+  profile_picture String?
+  name            String?
+  password        String
+  authProvider    AuthProvider      @default(EMAIL)
+  Session         Session[]
+  Article         Article[]
+  ArticleReaction ArticleReaction[]
+  Comment         Comment[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sessionToken String   @unique
+  userAgent    String
+  ip           String
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Article {
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  title           String
+  body            String
+  tags            String[]
+  authorId        String
+  author          User              @relation(fields: [authorId], references: [id])
+  ArticleReaction ArticleReaction[]
+  Comment         Comment[]
+}
+
+enum Reactions {
+  Heart
+  Like
+  Clap
+}
+
+model ArticleReaction {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  articleId String
+  reaction  Reactions @default(Heart)
+  article   Article   @relation(fields: [articleId], references: [id])
+  reactorId String
+  reactor   User      @relation(fields: [reactorId], references: [id])
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  body        String
+  CommentorId String
+  commentor   User     @relation(fields: [CommentorId], references: [id])
+  articleId   String
+  Article     Article  @relation(fields: [articleId], references: [id])
+}
