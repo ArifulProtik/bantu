@@ -34,6 +34,8 @@ model User {
   Article         Article[]
   ArticleReaction ArticleReaction[]
   Comment         Comment[]
+  Notification    Notification[]
+  Notifier        Notification?     @relation("Notifier")
 }
 
 model Session {
@@ -52,6 +54,7 @@ model Article {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   title           String
+  slug            String            @unique
   body            String
   tags            String[]
   authorId        String
@@ -74,6 +77,8 @@ model ArticleReaction {
   article   Article   @relation(fields: [articleId], references: [id])
   reactorId String
   reactor   User      @relation(fields: [reactorId], references: [id])
+
+  @@unique([articleId, reactorId])
 }
 
 model Comment {
@@ -85,4 +90,21 @@ model Comment {
   commentor   User     @relation(fields: [CommentorId], references: [id])
   articleId   String
   Article     Article  @relation(fields: [articleId], references: [id])
+}
+
+enum NotificationType {
+  Like
+  Comment
+  Follow
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  type       NotificationType
+  NofifierId String           @unique
+  Nofifier   User             @relation(fields: [NofifierId], references: [id], name: "Notifier")
+  userId     String
+  user       User             @relation(fields: [userId], references: [id])
 }
