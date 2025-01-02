@@ -1,13 +1,17 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Article } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 
 @Injectable()
 export class ArticleService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
   async createArticle(userid: string, createArticleDto: CreateArticleDto) {
     return this.prismaService.article.create({
@@ -173,12 +177,30 @@ export class ArticleService {
   }
   async createArticleReaction(userId: string, articleId: string) {
     try {
-      return await this.prismaService.articleReaction.create({
+      const article = await this.prismaService.article.findUnique({
+        where: {
+          id: articleId,
+        },
+      });
+      if (!article) {
+        throw new ForbiddenException('Article Not found');
+      }
+
+      const reaction = await this.prismaService.articleReaction.create({
         data: {
           reactorId: userId,
           articleId: articleId,
         },
       });
+      if (reaction && article.authorId !== userId) {
+        this.notificationService.createNotification({
+          actorId: userId,
+          receiverId: article.authorId,
+          entityId: articleId,
+          type: 'React',
+        });
+      }
+      return reaction;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

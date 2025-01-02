@@ -80,18 +80,33 @@ export class AuthService {
   }
 
   async ValidateSession(token: string) {
-    const SessionWithUser = await this.prisma.session.findFirst({
-      where: {
-        sessionToken: token,
-      },
-      include: {
-        user: true,
-      },
-    });
-    if (!SessionWithUser) {
-      throw new UnauthorizedException('session is invalid');
+    try {
+      await this.jwtService.verifyAsync(token);
+      const SessionWithUser = await this.prisma.session.findFirst({
+        where: {
+          sessionToken: token,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile_picture: true,
+            },
+          },
+        },
+      });
+      if (!SessionWithUser) {
+        throw new UnauthorizedException('session is invalid');
+      }
+      return SessionWithUser.user;
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('session expired please sign out');
+      }
+      throw new UnauthorizedException('invalid token');
     }
-    return SessionWithUser.user;
   }
   async signOut(token: string) {
     await this.prisma.session.delete({ where: { sessionToken: token } });

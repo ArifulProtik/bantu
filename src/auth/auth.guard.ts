@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { IS_PUBLIC_KEY } from './decorators/auth-metadata.decorator';
 
@@ -13,7 +12,6 @@ import { IS_PUBLIC_KEY } from './decorators/auth-metadata.decorator';
 export class AuthenticationGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly jwtService: JwtService,
     private readonly authService: AuthService,
   ) {}
 
@@ -31,20 +29,11 @@ export class AuthenticationGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('token is required');
     }
-    try {
-      await this.jwtService.verifyAsync(token);
-      const user = await this.authService.ValidateSession(token);
-      if (!user) {
-        throw new UnauthorizedException('invalid token');
-      }
-
-      request.user = user;
-      return true;
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('session expired please sign out');
-      }
+    const user = await this.authService.ValidateSession(token);
+    if (!user) {
       throw new UnauthorizedException('invalid token');
     }
+    request.user = user;
+    return true;
   }
 }

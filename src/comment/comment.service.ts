@@ -1,12 +1,32 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 @Injectable()
 export class CommentService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
   async createComment(userid: string, createCommentDto: CreateCommentDto) {
-    console.log(userid);
+    const a = await this.prismaService.article.findUnique({
+      where: { id: createCommentDto.article_id },
+      include: {
+        author: true,
+      },
+    });
+    if (!a) {
+      throw new ForbiddenException('Article not found');
+    }
+    if (a.authorId !== userid) {
+      await this.notificationService.createNotification({
+        actorId: userid,
+        receiverId: a.authorId,
+        entityId: createCommentDto.article_id,
+        type: 'Comment',
+      });
+    }
     return this.prismaService.comment.create({
       data: {
         body: createCommentDto.body,
