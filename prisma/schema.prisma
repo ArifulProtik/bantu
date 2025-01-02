@@ -36,6 +36,21 @@ model User {
   Comment              Comment[]
   NotificationActor    Notification[]    @relation("NotificationActor")
   NotificationReceiver Notification[]    @relation("NotificationReceiver")
+  Followers            Follow[]          @relation("Followers")
+  Followoing           Follow[]          @relation("Following")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  followerId  String
+  followingId String
+  follower    User     @relation("Followers", fields: [followerId], references: [id])
+  following   User     @relation("Following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 model Session {

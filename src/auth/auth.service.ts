@@ -8,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserService } from 'src/user/user.service';
 import { SigninDto, SignupDto } from './dto';
 
 @Injectable()
@@ -17,7 +16,6 @@ export class AuthService {
     private prisma: PrismaService,
     configService: ConfigService,
     private jwtService: JwtService,
-    private userService: UserService,
   ) {}
   async signIn(signinDto: SigninDto, ctx: any) {
     const user = await this.prisma.user.findUnique({
@@ -113,6 +111,13 @@ export class AuthService {
     return { message: 'signed out' };
   }
   async getMe(id: string) {
-    return await this.userService.GetUserById(id);
+    return await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      omit: {
+        password: true,
+      },
+    });
   }
 }
