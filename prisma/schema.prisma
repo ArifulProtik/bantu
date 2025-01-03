@@ -38,6 +38,8 @@ model User {
   NotificationReceiver Notification[]    @relation("NotificationReceiver")
   Followers            Follow[]          @relation("Followers")
   Followoing           Follow[]          @relation("Following")
+  Message              Message[]
+  Message              Message[]
 }
 
 model Follow {
