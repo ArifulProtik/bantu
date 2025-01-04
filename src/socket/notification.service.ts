@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationInput } from './notification-types';
-import { NotificationGateway } from './notification.gateway';
+import { NotificationGateway } from './socket.gateway';
 
 @Injectable()
 export class NotificationService {
@@ -80,5 +81,8 @@ export class NotificationService {
       },
     });
     return { message: 'Marked as read' };
+  }
+  sendMessages(data: Message) {
+    this.notificationGateway.newMessage(data);
   }
 }

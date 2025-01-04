@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { UserModule } from './user/user.module';
 import { ArticleModule } from './article/article.module';
+import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comment/comment.module';
-import { NotificationModule } from './notification/notification.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { SocketModule } from './socket/notification.module';
+import { UserModule } from './user/user.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { NotificationModule } from './notification/notification.module';
     UserModule,
     ArticleModule,
     CommentModule,
-    NotificationModule,
+    SocketModule,
+    MessageModule,
   ],
 })
 export class AppModule {}

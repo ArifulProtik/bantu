@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Article } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NotificationService } from 'src/socket/notification.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 

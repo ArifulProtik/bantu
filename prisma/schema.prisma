@@ -38,8 +38,10 @@ model User {
   NotificationReceiver Notification[]    @relation("NotificationReceiver")
   Followers            Follow[]          @relation("Followers")
   Followoing           Follow[]          @relation("Following")
-  Message              Message[]
-  Message              Message[]
+  Conversation         Conversation?     @relation(fields: [conversationId], references: [id])
+  conversationId       String?
+  ReceiverMsg          Message[]         @relation("receiver")
+  SenderMsg            Message[]         @relation("sender")
 }
 
 model Follow {
@@ -128,4 +130,36 @@ model Notification {
   actor      User   @relation("NotificationActor", fields: [actorId], references: [id])
   receiverId String // Who receives the notification
   receiver   User   @relation("NotificationReceiver", fields: [receiverId], references: [id])
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  members   User[]
+  Message   Message[]
+}
+
+enum MessageAknowledgement {
+  Sent
+  Delivered
+  Read
+}
+
+model Message {
+  id             String                @id @default(uuid())
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  body           String
+  ackowledgement MessageAknowledgement
+  receiverId     String
+  receiver       User                  @relation(name: "receiver", fields: [receiverId], references: [id])
+  senderId       String
+  sender         User                  @relation(name: "sender", fields: [senderId], references: [id])
+  conversationId String
+  conversation   Conversation          @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@index([receiverId])
 }

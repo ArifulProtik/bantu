@@ -6,7 +6,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Notification } from '@prisma/client';
+import { Message, Notification } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { SocketIoMiddleware } from 'src/auth/socket.middleware';
@@ -46,6 +46,12 @@ export class NotificationGateway implements OnGatewayInit {
     const client = this.activeClients.get(data.receiverId);
     if (client) {
       client.emit('notification', data);
+    }
+  }
+  newMessage(data: Message) {
+    const client = this.activeClients.get(data.receiverId);
+    if (client) {
+      client.emit('incoming-message', data);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NotificationService } from 'src/socket/notification.service';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
-import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NotificationService } from 'src/socket/notification.service';
 import { PasswordDto, UpdateUserDto } from './dto';
 
 @Injectable()
